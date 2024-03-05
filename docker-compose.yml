@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  bot:
+    restart: always
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    networks:
+      - backend
+
+  postgres:
+    image: "postgres:16.0"
+    restart: always
+#    ports:
+#      - "5433:5433"
+    environment:
+      POSTGRES_USER: binb
+      POSTGRES_PASSWORD: binb
+      POSTGRES_DB: binb
+    networks:
+      - backend
+
+networks:
+  backend:
