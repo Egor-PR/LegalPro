@@ -2,12 +2,24 @@ version: '3'
 
 services:
   bot:
+    container_name: bot
     restart: always
     build:
       context: .
       dockerfile: ./Dockerfile
     volumes:
       - ./config.ini:/opt/urprofbot/config.ini
+    networks:
+      - backend
+
+  redis:
+    container_name: redis
+    image: redis:5.0.14
+    restart: always
+    expose:
+      - "6379"
+    volumes:
+      - ./redis-data:/data
     networks:
       - backend
 

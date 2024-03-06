@@ -12,3 +12,5 @@ COPY . .
 
 EXPOSE 80
 CMD python src/tgbot/main.py
+
+

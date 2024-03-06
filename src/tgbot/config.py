@@ -3,6 +3,11 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 
+@dataclass
+class RedisConfig:
+    url: str
+
+
 class LoggerLevel(StrEnum):
     info = 'INFO'
     debug = 'DEBUG'
@@ -22,6 +27,7 @@ class TgBotConfig:
 class Config:
     logger: LoggerConfig
     tgbot: TgBotConfig
+    redis: RedisConfig
 
 
 def load_config(path: str):
@@ -30,6 +36,7 @@ def load_config(path: str):
 
     logger_conf = config['logger']
     tgbot_conf = config['tgbot']
+    redis_conf = config['redis']
 
     return Config(
         logger=LoggerConfig(
@@ -37,5 +44,8 @@ def load_config(path: str):
         ),
         tgbot=TgBotConfig(
             token=tgbot_conf.get('token'),
+        ),
+        redis=RedisConfig(
+            url=redis_conf.get('url'),
         ),
     )

@@ -5,6 +5,8 @@ import handlers
 from aiogram import Bot, Dispatcher
 
 from config import load_config, LoggerConfig
+from middlewares import AuthMiddleware
+from services import Storage
 
 logger = logging.getLogger(__name__)
 
@@ -18,12 +20,18 @@ def configurate_logger(config: LoggerConfig):
 
 async def main():
     config = load_config('config.ini')
+
+    logger.warning('Configurate logger')
     configurate_logger(config.logger)
+
+    logger.warning('Initiate storage')
+    storage = Storage.from_url(config.redis.url)
 
     logger.warning('Starting bot')
     bot = Bot(token=config.tgbot.token)
 
-    dp = Dispatcher()
+    dp = Dispatcher(storage=storage)
+    dp.message.middleware(AuthMiddleware(storage=storage))
     dp.include_routers(
         handlers.echo_router,
     )
