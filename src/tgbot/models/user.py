@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 
 @dataclass
@@ -9,3 +9,5 @@ class User:
     job_title: str | None = None
     is_active: bool = False
     chat_id: int | None = None
+
+    dict = asdict
