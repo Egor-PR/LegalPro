@@ -4,6 +4,14 @@ from enum import StrEnum
 
 
 @dataclass
+class GoogleRepositoryConfig:
+    spreadsheet_id: str
+    users_sheet_name: str
+    users_sheet_range: str
+    handbook_expire_seconds: int
+
+
+@dataclass
 class GoogleSheetsConfig:
     discovery_url: str
     service_name: str
@@ -38,6 +46,7 @@ class Config:
     tgbot: TgBotConfig
     redis: RedisConfig
     google_sheets: GoogleSheetsConfig
+    google_repository: GoogleRepositoryConfig
 
 
 def load_config(path: str):
@@ -48,6 +57,7 @@ def load_config(path: str):
     tgbot_conf = config['tgbot']
     redis_conf = config['redis']
     google_sheets_conf = config['google_sheets']
+    google_repository_conf = config['google_repository']
 
     return Config(
         logger=LoggerConfig(
@@ -65,5 +75,11 @@ def load_config(path: str):
             version=google_sheets_conf.get('version'),
             creds_file=google_sheets_conf.get('creds_file'),
             scopes=google_sheets_conf.get('scopes'),
+        ),
+        google_repository=GoogleRepositoryConfig(
+            spreadsheet_id=google_repository_conf.get('spreadsheet_id'),
+            users_sheet_name=google_repository_conf.get('users_sheet_name'),
+            users_sheet_range=google_repository_conf.get('users_sheet_range'),
+            handbook_expire_seconds=google_repository_conf.get('handbook_expire_seconds'),
         ),
     )

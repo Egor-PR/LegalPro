@@ -58,7 +58,9 @@ class Application:
     async def authenticate(self, user_code: str, chat_id: int | None = None) -> Response:
         user = await self.repository.users.get_user_by_code(user_code)
         if user is None:
-            return await create_message_response([Replies.PLEASE_AUTH, Replies.ENTER_PERSONAL_CODE])
+            return await create_message_response([
+                Replies.WRONG_PERSONAL_CODE, Replies.PLEASE_AUTH, Replies.ENTER_PERSONAL_CODE
+            ])
         user.chat_id = chat_id
         await self.repository.users.upsert(user)
         return await self.menu(user)

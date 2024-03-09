@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher
 from config import load_config, LoggerConfig
 from middlewares import AuthMiddleware
 from services import Application, GoogleSheetsApiService, Storage
-from services.repostiories import Repository
+from services.repostiories import Repository, GoogleRepository
 from handlers import messages_router
 
 logger = logging.getLogger(__name__)
@@ -29,16 +29,30 @@ async def main():
     storage = Storage.from_url(config.redis.url)
 
     logger.warning('Initiate google repository')
-    google_repo = GoogleSheetsApiService(
+    google_sheets_service = GoogleSheetsApiService(
         creds_file=config.google_sheets.creds_file,
         discovery_url=config.google_sheets.discovery_url,
         service_name=config.google_sheets.service_name,
-        scopes=config.google_sheets.scopes,
+        scopes=[config.google_sheets.scopes],
         version=config.google_sheets.version,
     )
 
+    logger.warning('Initiate google repository')
+    google_repository = GoogleRepository(
+        storage=storage,
+        google_sheet_service=google_sheets_service,
+        spreadsheet_id=config.google_repository.spreadsheet_id,
+        users_sheet_name=config.google_repository.users_sheet_name,
+        users_sheet_range=config.google_repository.users_sheet_range,
+        handbook_expire_seconds=config.google_repository.handbook_expire_seconds,
+    )
+
     logger.warning('Initiate repository')
-    repository = Repository(storage=storage, google_sheet_service=google_repo)
+    repository = Repository(
+        storage=storage,
+        google_sheet_service=google_sheets_service,
+        google_repository=google_repository,
+    )
 
     logger.warning('Create main app interface')
     app = Application(repository=repository)
