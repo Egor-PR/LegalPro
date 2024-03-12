@@ -13,9 +13,9 @@ class Storage(RedisStorage):
 
     async def build_key(
         self,
-        key: list[str],
+        key: list[str | int],
     ) -> str:
-        return self.key_separator.join(key)
+        return self.key_separator.join([str(k) for k in key])
 
     async def set_data(
         self,

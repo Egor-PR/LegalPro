@@ -10,6 +10,13 @@ class ResponseType(StrEnum):
 
 
 @dataclass
+class ReplyCalendarResponse:
+    messages: list[str]
+    year: int
+    month: int
+
+
+@dataclass
 class ReplyKeyboardResponse:
     messages: list[str]
     buttons: list[list[str]]
@@ -29,3 +36,4 @@ class Response:
     type: ResponseType
     message_response: TextMessagesResponse | None = None
     reply_keyboard_response: ReplyKeyboardResponse | None = None
+    calendar_response: ReplyCalendarResponse | None = None

@@ -21,7 +21,7 @@ class AuthMiddleware(BaseMiddleware):
         data: Dict[str, Any],
     ) -> Any:
         app: Application = data['dispatcher'].get('app')
-        chat_id = event.chat.id
+        chat_id = event.from_user.id
         user = await app.auth(chat_id)
         data.update({'user': user if user else None})
         return await handler(event, data)

@@ -1,40 +1,13 @@
 import logging
 
-from models import User, Response, ResponseType, ReplyKeyboardResponse, TextMessagesResponse
+from models import User, Response
+
 from .constants import Replies, MenuButtons
 from .repostiories import Repository
+from .scenarios import ClientReportScenario, WorkTimeReportScenario
+from .utils import create_reply_keyboard_response, create_message_response
 
 logger = logging.getLogger(__name__)
-
-
-async def create_reply_keyboard_response(
-    messages: list[str],
-    buttons: list[list[str]],
-    is_persistent: bool | None = None,
-    resize_keyboard: bool | None = None,
-    one_time_keyboard: bool | None = None,
-    input_field_placeholder: bool | None = None,
-) -> Response:
-    reply_keyboard_resp = ReplyKeyboardResponse(
-        messages=messages,
-        buttons=buttons,
-        is_persistent=is_persistent,
-        resize_keyboard=resize_keyboard,
-        one_time_keyboard=one_time_keyboard,
-        input_field_placeholder=input_field_placeholder,
-    )
-    return Response(
-        type=ResponseType.LIST_REPLY_KEYBOARD,
-        reply_keyboard_response=reply_keyboard_resp,
-    )
-
-
-async def create_message_response(messages: list[str]) -> Response:
-    message_response = TextMessagesResponse(messages=messages)
-    return Response(
-        type=ResponseType.TEXT_MESSAGES,
-        message_response=message_response,
-    )
 
 
 class Application:
@@ -73,4 +46,21 @@ class Application:
     ) -> Response:
         if user is None:
             return await self.authenticate(user_message, chat_id)
+
+        user_scenario = await self.repository.scenarios.get_user_scenario(user)
+
+        if user_scenario and user_scenario.name == WorkTimeReportScenario.name:
+            return await WorkTimeReportScenario(self.repository).prologue(
+                user_message, user, user_scenario
+            )
+        elif user_scenario and user_scenario.name == ClientReportScenario.name:
+            return await ClientReportScenario(self.repository).prologue(
+                user_message, user, user_scenario
+            )
+
+        if user_message == MenuButtons.TIME_REPORT:
+            return await WorkTimeReportScenario(self.repository).prologue(user_message, user)
+        elif user_message == MenuButtons.CLIENT_REPORT:
+            pass
+
         return await self.menu(user)

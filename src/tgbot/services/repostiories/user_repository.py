@@ -39,8 +39,8 @@ class UserRepository:
             logger.exception(exc)
             return _user
 
-        _user = await self.get_user_by_code(_user.id)
-        if _user and not _user.is_active:
+        _user_from_sheet = await self.get_user_by_code(_user.id)
+        if _user_from_sheet and not _user_from_sheet.is_active:
             await self.storage.set_data(keys=[self._user_key, str(chat_id)])
             return None
 

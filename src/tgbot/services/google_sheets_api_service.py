@@ -146,7 +146,6 @@ class GoogleSheetsApiService:
                 body=body,
             ).execute()
             if return_row_id:
-                logger.info(result)
                 return parse_row_from_range(result['updates']['updatedRange'])
         except Exception as exc:
             logger.exception(exc)

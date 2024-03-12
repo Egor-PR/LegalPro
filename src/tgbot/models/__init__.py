@@ -1,5 +1,6 @@
-from .response import Response, ResponseType, TextMessagesResponse, ReplyKeyboardResponse
+from .response import Response, ResponseType, TextMessagesResponse, ReplyKeyboardResponse, ReplyCalendarResponse
 from .user import User
+from .scenario import Scenario, ScenarioStep
 
 __all__ = [
     'User',
@@ -7,4 +8,7 @@ __all__ = [
     'ResponseType',
     'TextMessagesResponse',
     'ReplyKeyboardResponse',
+    'Scenario',
+    'ScenarioStep',
+    'ReplyCalendarResponse',
 ]

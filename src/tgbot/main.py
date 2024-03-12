@@ -62,6 +62,7 @@ async def main():
 
     dp = Dispatcher(app=app)
     dp.message.middleware(AuthMiddleware(storage=storage))
+    dp.callback_query.middleware(AuthMiddleware(storage=storage))
     dp.include_routers(
         messages_router,
     )
