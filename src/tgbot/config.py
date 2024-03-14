@@ -9,6 +9,10 @@ class GoogleRepositoryConfig:
     users_sheet_name: str
     users_sheet_range: str
     handbook_expire_seconds: int
+    work_types_sheet_name: str
+    work_types_sheet_range: str
+    clients_sheet_name: str
+    clients_sheet_range: str
 
 
 @dataclass
@@ -81,5 +85,9 @@ def load_config(path: str):
             users_sheet_name=google_repository_conf.get('users_sheet_name'),
             users_sheet_range=google_repository_conf.get('users_sheet_range'),
             handbook_expire_seconds=google_repository_conf.get('handbook_expire_seconds'),
+            work_types_sheet_name=google_repository_conf.get('work_types_sheet_name'),
+            work_types_sheet_range=google_repository_conf.get('work_types_sheet_range'),
+            clients_sheet_name=google_repository_conf.get('clients_sheet_name'),
+            clients_sheet_range=google_repository_conf.get('clients_sheet_range')
         ),
     )

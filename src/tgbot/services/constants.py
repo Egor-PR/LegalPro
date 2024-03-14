@@ -7,6 +7,8 @@ class RedisKeys(StrEnum):
     USERS_LIST_KEY = 'users'
     USER_KEY = 'user'
     SCENARIO_KEY = 'scenario'
+    WORK_TYPES_KEY = 'work_types'
+    CLIENTS_KEY = 'clients'
 
 
 class MenuButtons(StrEnum):
@@ -24,5 +26,6 @@ class Replies:
     ENTER_PERSONAL_CODE = emojize('Введите ваш уникальный код :input_numbers:')
     CHOOSE_MENU = 'Выберите пункт меню'
 
-    ENTER_OR_CHOOSE_DATE = 'Введите дату в формате ДД.ММ.ГГГГ или выберите дату'
+    ENTER_DATE = 'Введите дату в формате ДД.ММ.ГГГГ'
+    CHOOSE_DATE = emojize('Или выберите из календаря :spiral_calendar:')
     WRONG_DATE_FORMAT = emojize('Неверный формат даты :man_facepalming:')

@@ -38,12 +38,12 @@ class WorkTimeReportScenario:
                 return await self.step_dispatcher[scenario.current_step](user, scenario)
             except ValueError:
                 return await create_calendar_response(
-                    messages=[Replies.WRONG_DATE_FORMAT, Replies.ENTER_OR_CHOOSE_DATE],
+                    messages=[Replies.WRONG_DATE_FORMAT, Replies.ENTER_DATE, Replies.CHOOSE_DATE],
                     year=datetime.now().year,
                     month=datetime.now().month,
                 )
         return await create_calendar_response(
-            messages=[Replies.ENTER_OR_CHOOSE_DATE],
+            messages=[Replies.ENTER_DATE, Replies.CHOOSE_DATE],
             year=datetime.now().year,
             month=datetime.now().month,
         )
