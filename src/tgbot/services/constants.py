@@ -35,6 +35,6 @@ class Replies:
     CHOOSE_CLIENT = emojize('Выберите клиента из списка :open_file_folder:')
     WRONG_CLIENT = emojize('Не могу найти такого клиента :man_shrugging:')
 
-    ENTER_TIME = 'Введите время в формате ЧЧ:ММ'
+    ENTER_TIME = 'Введите затраченное время в формате ЧЧ:ММ'
     CHOOSE_TIME = emojize('Или выберите из списка :alarm_clock:')
     WRONG_TIME_FORMAT = emojize('Неверный формат времени :man_facepalming:')
