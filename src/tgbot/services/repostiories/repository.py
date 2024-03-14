@@ -4,6 +4,8 @@ from services.google_sheets_api_service import GoogleSheetsApiService
 from .google_repository import GoogleRepository
 from .user_repository import UserRepository
 from .scenario_repository import ScenarioRepository
+from .work_type_repository import WorkTypeRepository
+from .client_repository import ClientRepository
 
 
 class Repository:
@@ -22,6 +24,16 @@ class Repository:
             google_repository=google_repository,
         )
         self.scenarios = ScenarioRepository(
+            storage=storage,
+            google_sheet_service=google_sheet_service,
+            google_repository=google_repository,
+        )
+        self.work_types = WorkTypeRepository(
+            storage=storage,
+            google_sheet_service=google_sheet_service,
+            google_repository=google_repository,
+        )
+        self.clients = ClientRepository(
             storage=storage,
             google_sheet_service=google_sheet_service,
             google_repository=google_repository,

@@ -29,3 +29,12 @@ class Replies:
     ENTER_DATE = 'Введите дату в формате ДД.ММ.ГГГГ'
     CHOOSE_DATE = emojize('Или выберите из календаря :spiral_calendar:')
     WRONG_DATE_FORMAT = emojize('Неверный формат даты :man_facepalming:')
+
+    CHOOSE_WORK_TYPE = emojize('Выберите вид работы из списка :toolbox:')
+    WRONG_WORK_TYPE = emojize('Не могу найти такой вид работы :man_shrugging:')
+    CHOOSE_CLIENT = emojize('Выберите клиента из списка :open_file_folder:')
+    WRONG_CLIENT = emojize('Не могу найти такого клиента :man_shrugging:')
+
+    ENTER_TIME = 'Введите время в формате ЧЧ:ММ'
+    CHOOSE_TIME = emojize('Или выберите из списка :alarm_clock:')
+    WRONG_TIME_FORMAT = emojize('Неверный формат времени :man_facepalming:')

@@ -106,6 +106,18 @@ class SimpleCalendar:
             *calendar_rows,
         ])
 
+        inline_kb.inline_keyboard.append([
+            InlineKeyboardButton(
+                text="Сегодня",
+                callback_data=CalendarCallback(
+                    act="TODAY",
+                    year=year,
+                    month=month,
+                    day=datetime.now().day
+                ).pack()
+            )
+        ])
+
         if skip_calendar:
             inline_kb.inline_keyboard.append([
                 InlineKeyboardButton(
@@ -156,5 +168,8 @@ class SimpleCalendar:
         if data.act == "SKIP":
             await query.message.delete_reply_markup()
             return_data = True, 'Пропустить'
+        if data.act == "TODAY":
+            await query.message.delete_reply_markup()
+            return_data = True, datetime.now()
         # at some point user clicks DAY button, returning date
         return return_data
