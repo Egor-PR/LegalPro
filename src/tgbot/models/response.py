@@ -37,3 +37,8 @@ class Response:
     message_response: TextMessagesResponse | None = None
     reply_keyboard_response: ReplyKeyboardResponse | None = None
     calendar_response: ReplyCalendarResponse | None = None
+
+
+@dataclass
+class FinalResponse:
+    pass

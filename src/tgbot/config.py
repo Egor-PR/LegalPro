@@ -13,6 +13,8 @@ class GoogleRepositoryConfig:
     work_types_sheet_range: str
     clients_sheet_name: str
     clients_sheet_range: str
+    work_time_report_sheet_name: str
+    work_time_report_sheet_range: str
 
 
 @dataclass
@@ -88,6 +90,8 @@ def load_config(path: str):
             work_types_sheet_name=google_repository_conf.get('work_types_sheet_name'),
             work_types_sheet_range=google_repository_conf.get('work_types_sheet_range'),
             clients_sheet_name=google_repository_conf.get('clients_sheet_name'),
-            clients_sheet_range=google_repository_conf.get('clients_sheet_range')
+            clients_sheet_range=google_repository_conf.get('clients_sheet_range'),
+            work_time_report_sheet_name=google_repository_conf.get('work_time_report_sheet_name'),
+            work_time_report_sheet_range=google_repository_conf.get('work_time_report_sheet_range'),
         ),
     )

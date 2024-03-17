@@ -20,7 +20,15 @@ class MenuButtons(StrEnum):
         return [e.value for e in cls]
 
 
+class Notifications:
+    SAVE_IN_PROGRESS = emojize('Сохраняем данные :floppy_disk:')
+    SAVING_PROBLEM = emojize('Произошла ошибка при сохранении данных :face_screaming_in_fear:')
+    SAVING_SUCCESS = emojize('Данные успешно сохранены :check_mark:')
+
+
 class Replies:
+    SKIP = 'Пропустить'
+
     WRONG_PERSONAL_CODE = emojize('Хмм... :thinking_face:  Не могу авторизовать по введенному коду')
     PLEASE_AUTH = 'Для работы с ботом необходимо авторизоваться'
     ENTER_PERSONAL_CODE = emojize('Введите ваш уникальный код :input_numbers:')
@@ -38,3 +46,5 @@ class Replies:
     ENTER_TIME = 'Введите затраченное время в формате ЧЧ:ММ'
     CHOOSE_TIME = emojize('Или выберите из списка :alarm_clock:')
     WRONG_TIME_FORMAT = emojize('Неверный формат времени :man_facepalming:')
+
+    ENTER_COMMENT = 'Добавьте комментарий'

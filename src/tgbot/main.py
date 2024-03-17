@@ -50,6 +50,8 @@ async def main():
         work_types_sheet_range=config.google_repository.work_types_sheet_range,
         clients_sheet_name=config.google_repository.clients_sheet_name,
         clients_sheet_range=config.google_repository.clients_sheet_range,
+        work_time_report_sheet_name=config.google_repository.work_time_report_sheet_name,
+        work_time_report_sheet_range=config.google_repository.work_time_report_sheet_range,
     )
 
     logger.warning('Initiate repository')

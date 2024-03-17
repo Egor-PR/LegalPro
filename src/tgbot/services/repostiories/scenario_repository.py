@@ -23,6 +23,12 @@ class ScenarioRepository:
         self.google_sheet_service = google_sheet_service
         self.google_repository = google_repository
 
+    async def del_user_scenario(self, user: User):
+        await self.storage.set_data(
+            keys=[self._scenario_key, user.chat_id],
+            data={},
+        )
+
     async def upsert_user_scenario(self, user: User, scenario: Scenario):
         steps = [step.dict() for step in scenario.steps]
         scenario_dict = scenario.dict()

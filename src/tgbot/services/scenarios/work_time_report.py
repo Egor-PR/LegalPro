@@ -1,8 +1,9 @@
 import logging
 from datetime import datetime
 
-from models import User, Response, ResponseType, ReplyKeyboardResponse, TextMessagesResponse, Scenario, ScenarioStep
-from services.constants import Replies, MenuButtons
+from models import User, Scenario, ScenarioStep, WorkTimeReport, FinalResponse
+from models import Response, ResponseType, ReplyKeyboardResponse, TextMessagesResponse
+from services.constants import Replies, MenuButtons, Notifications
 from services.notifier import AbstractNotifier
 from services.repostiories import Repository
 from services.utils import create_reply_keyboard_response, create_message_response
@@ -18,22 +19,39 @@ class WorkTimeReportScenario:
         self.repository = repository
         self.notifier = notifier
         self.step_dispatcher = {
-            1: self.step_1,
-            2: self.step_2,
-            3: self.step_3,
-            4: self.step_4,
-            5: self.step_5,
+            1: self.enter_date,
+            2: self.choose_work_type,
+            3: self.choose_client,
+            4: self.enter_time,
+            5: self.enter_comment,
+            6: self.finish,
         }
 
-    async def step_5(self, user: User, scenario: Scenario, message: str | None = None) -> Response:
+    async def enter_comment(
+        self,
+        user: User,
+        scenario: Scenario,
+        message: str | None = None,
+    ) -> Response:
         step_number = 5
         await self._add_step(step_number, user, scenario)
+        if message is not None:
+            # FIXME: get skip messages from constants
+            if message.lower() in ['skip', 'пропустить']:
+                message = '-'
+            return await self._fix_and_next(step_number, message, user, scenario)
         return await create_reply_keyboard_response(
-            messages=['Step 5'],
-            buttons=[],
+            messages=[Replies.ENTER_COMMENT],
+            buttons=[[Replies.SKIP]],
+            resize_keyboard=True,
         )
 
-    async def step_4(self, user: User, scenario: Scenario, message: str | None = None) -> Response:
+    async def enter_time(
+        self,
+        user: User,
+        scenario: Scenario,
+        message: str | None = None,
+    ) -> Response:
         step_number = 4
         await self._add_step(step_number, user, scenario)
         timings = [
@@ -52,13 +70,20 @@ class WorkTimeReportScenario:
                 return await create_reply_keyboard_response(
                     messages=[Replies.WRONG_TIME_FORMAT, Replies.ENTER_TIME, Replies.CHOOSE_TIME],
                     buttons=timings,
+                    resize_keyboard=True,
                 )
         return await create_reply_keyboard_response(
             messages=[Replies.ENTER_TIME, Replies.CHOOSE_TIME],
             buttons=timings,
+            resize_keyboard=True,
         )
 
-    async def step_3(self, user: User, scenario: Scenario, message: str | None = None) -> Response:
+    async def choose_client(
+        self,
+        user: User,
+        scenario: Scenario,
+        message: str | None = None,
+    ) -> Response:
         step_number = 3
         await self._add_step(step_number, user, scenario)
         clients = await self.repository.clients.get_clients(is_completed=False)
@@ -68,14 +93,21 @@ class WorkTimeReportScenario:
                 return await create_reply_keyboard_response(
                     messages=[Replies.WRONG_CLIENT, Replies.CHOOSE_CLIENT],
                     buttons=client_list,
+                    resize_keyboard=True,
                 )
             return await self._fix_and_next(step_number, message, user, scenario)
         return await create_reply_keyboard_response(
             messages=[Replies.CHOOSE_CLIENT],
             buttons=client_list,
+            resize_keyboard=True,
         )
 
-    async def step_2(self, user: User, scenario: Scenario, message: str | None = None) -> Response:
+    async def choose_work_type(
+        self,
+        user: User,
+        scenario: Scenario,
+        message: str | None = None,
+    ) -> Response:
         step_number = 2
         await self._add_step(step_number, user, scenario)
         work_types = await self.repository.work_types.get_work_types()
@@ -85,14 +117,21 @@ class WorkTimeReportScenario:
                 return await create_reply_keyboard_response(
                     messages=[Replies.WRONG_WORK_TYPE, Replies.CHOOSE_WORK_TYPE],
                     buttons=work_list,
+                    resize_keyboard=True,
                 )
             return await self._fix_and_next(step_number, message, user, scenario)
         return await create_reply_keyboard_response(
             messages=[Replies.CHOOSE_WORK_TYPE],
             buttons=work_list,
+            resize_keyboard=True,
         )
 
-    async def step_1(self, user: User, scenario: Scenario, message: str | None = None) -> Response:
+    async def enter_date(
+        self,
+        user: User,
+        scenario: Scenario,
+        message: str | None = None,
+    ) -> Response:
         step_number = 1
         await self._add_step(step_number, user, scenario)
         if message is not None:
@@ -119,7 +158,13 @@ class WorkTimeReportScenario:
         await self.repository.scenarios.upsert_user_scenario(user, scenario)
         return scenario
 
-    async def _fix_and_next(self, step: int, result: str, user: User, scenario: Scenario) -> Response:
+    async def _fix_and_next(
+        self,
+        step: int,
+        result: str,
+        user: User,
+        scenario: Scenario,
+    ) -> Response:
         for _step in scenario.steps:
             if _step.number == step:
                 _step.result = result
@@ -128,8 +173,47 @@ class WorkTimeReportScenario:
         await self.repository.scenarios.upsert_user_scenario(user, scenario)
         return await self.step_dispatcher[scenario.current_step](user, scenario)
 
-    async def finish(self, user: User) -> Response:
-        pass
+    async def finish(self, user: User, scenario: Scenario, *args, **kwargs):
+        await self.notifier.notify(Notifications.SAVE_IN_PROGRESS, user)
+
+        report_date = None
+        work_type = None
+        client = None
+        hours = None
+        comment = None
+        try:
+            for step in scenario.steps:
+                if step.number == 1:
+                    report_date = step.result
+                elif step.number == 2:
+                    work_type = step.result
+                elif step.number == 3:
+                    client = step.result
+                elif step.number == 4:
+                    hours = step.result
+                elif step.number == 5:
+                    comment = step.result
+            report = WorkTimeReport(
+                report_date=report_date,
+                user_id=user.id,
+                user_fullname=user.fullname,
+                user_job_title=user.job_title,
+                work_type=work_type,
+                client=client,
+                hours=hours,
+                comment=comment,
+            )
+            result = await self.repository.google_repository.append_work_time_report(report)
+            await self.repository.scenarios.del_user_scenario(user)
+            if not result:
+                raise Exception('Error while saving work time report')
+            await self.notifier.notify(Notifications.SAVING_SUCCESS, user)
+            return FinalResponse()
+        except Exception as e:
+            logger.error(f'Error while finish scenario: {e}')
+            logger.exception(e)
+            await self.notifier.notify(Notifications.SAVING_PROBLEM, user)
+            # TODO: hand this case (repeat saving or reset scenario)
 
     async def start(self, user: User) -> Response:
         _user_scenario = Scenario(
@@ -138,7 +222,7 @@ class WorkTimeReportScenario:
             steps=[ScenarioStep(number=1)],
         )
         await self.repository.scenarios.upsert_user_scenario(user, _user_scenario)
-        return await self.step_1(user, _user_scenario)
+        return await self.step_dispatcher[1](user, _user_scenario)
 
     async def prologue(
         self,

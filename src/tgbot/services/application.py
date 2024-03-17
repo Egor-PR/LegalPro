@@ -61,7 +61,11 @@ class Application:
             )
 
         if user_message == MenuButtons.TIME_REPORT:
-            return await WorkTimeReportScenario(self.repository).prologue(user_message, user)
+            response = await WorkTimeReportScenario(self.repository, self.notifier).prologue(
+                user_message, user
+            )
+            if isinstance(response, Response):
+                return response
         elif user_message == MenuButtons.CLIENT_REPORT:
             pass
 

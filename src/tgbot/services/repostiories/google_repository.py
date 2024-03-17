@@ -1,7 +1,7 @@
 import logging
 from enum import StrEnum
 
-from models import User, WorkType, Client
+from models import User, WorkType, Client, Scenario, ScenarioStep, WorkTimeReport
 from services.constants import RedisKeys
 from services.google_sheets_api_service import GoogleSheetsApiService
 from services.storage import Storage
@@ -31,6 +31,8 @@ class GoogleRepository:
         work_types_sheet_range: str,
         clients_sheet_name: str,
         clients_sheet_range: str,
+        work_time_report_sheet_name: str,
+        work_time_report_sheet_range: str,
     ):
         self.storage = storage
         self.google_sheet_service = google_sheet_service
@@ -42,6 +44,17 @@ class GoogleRepository:
         self.work_types_sheet_range = work_types_sheet_range
         self.clients_sheet_name = clients_sheet_name
         self.clients_sheet_range = clients_sheet_range
+        self.work_time_report_sheet_name = work_time_report_sheet_name
+        self.work_time_report_sheet_range = work_time_report_sheet_range
+
+    async def append_work_time_report(self, report: WorkTimeReport) -> bool:
+        data = [report.get_list()]
+        return self.google_sheet_service.append(
+            spreadsheet_id=self.spreadsheet_id,
+            sheet_name=self.work_time_report_sheet_name,
+            sheet_range=self.work_time_report_sheet_range,
+            data=data,
+        )
 
     async def update_handbooks_data(self):
         data = [

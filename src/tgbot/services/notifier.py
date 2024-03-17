@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class AbstractNotifier(ABC):
     @abstractmethod
-    def notify(self, message: str, user: User) -> None:
+    async def notify(self, message: str, user: User) -> None:
         pass
 
 
@@ -19,12 +19,12 @@ class TelegramBotNotifier(AbstractNotifier):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    def notify(self, message: str, user: User) -> None:
+    async def notify(self, message: str, user: User) -> None:
         if user.chat_id is None:
             logger.warning(f'User {user.fullname} has no chat_id to send a notify message')
             return
 
-        self.bot.send_message(
+        await self.bot.send_message(
             chat_id=user.chat_id,
             text=message,
             parse_mode='MarkdownV2',
