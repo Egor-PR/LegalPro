@@ -3,6 +3,7 @@ import logging
 from models import User, Response
 
 from .constants import Replies, MenuButtons
+from .notifier import AbstractNotifier
 from .repostiories import Repository
 from .scenarios import ClientReportScenario, WorkTimeReportScenario
 from .utils import create_reply_keyboard_response, create_message_response
@@ -11,8 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class Application:
-    def __init__(self, repository: Repository):
+    def __init__(self, repository: Repository, notifier: AbstractNotifier):
         self.repository = repository
+        self.notifier = notifier
 
     async def menu(self, user: User) -> Response:
         menu_buttons = [
@@ -50,11 +52,11 @@ class Application:
         user_scenario = await self.repository.scenarios.get_user_scenario(user)
 
         if user_scenario and user_scenario.name == WorkTimeReportScenario.name:
-            return await WorkTimeReportScenario(self.repository).prologue(
+            return await WorkTimeReportScenario(self.repository, self.notifier).prologue(
                 user_message, user, user_scenario
             )
         elif user_scenario and user_scenario.name == ClientReportScenario.name:
-            return await ClientReportScenario(self.repository).prologue(
+            return await ClientReportScenario(self.repository, self.notifier).prologue(
                 user_message, user, user_scenario
             )
 

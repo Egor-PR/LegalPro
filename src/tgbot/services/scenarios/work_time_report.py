@@ -3,6 +3,7 @@ from datetime import datetime
 
 from models import User, Response, ResponseType, ReplyKeyboardResponse, TextMessagesResponse, Scenario, ScenarioStep
 from services.constants import Replies, MenuButtons
+from services.notifier import AbstractNotifier
 from services.repostiories import Repository
 from services.utils import create_reply_keyboard_response, create_message_response
 from services.utils import create_calendar_response
@@ -13,8 +14,9 @@ logger = logging.getLogger(__name__)
 class WorkTimeReportScenario:
     name = 'work_time_report'
 
-    def __init__(self, repository: Repository):
+    def __init__(self, repository: Repository, notifier: AbstractNotifier):
         self.repository = repository
+        self.notifier = notifier
         self.step_dispatcher = {
             1: self.step_1,
             2: self.step_2,

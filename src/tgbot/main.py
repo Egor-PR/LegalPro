@@ -6,6 +6,7 @@ from aiogram import Bot, Dispatcher
 from config import load_config, LoggerConfig
 from middlewares import AuthMiddleware
 from services import Application, GoogleSheetsApiService, Storage
+from services.notifier import AbstractNotifier, TelegramBotNotifier
 from services.repostiories import Repository, GoogleRepository
 from handlers import messages_router
 
@@ -58,11 +59,14 @@ async def main():
         google_repository=google_repository,
     )
 
-    logger.warning('Create main app interface')
-    app = Application(repository=repository)
-
     logger.warning('Starting bot')
     bot = Bot(token=config.tgbot.token)
+
+    logger.warning('Initiate notifier')
+    notifier: AbstractNotifier = TelegramBotNotifier(bot=bot)
+
+    logger.warning('Create main app interface')
+    app = Application(repository=repository, notifier=notifier)
 
     dp = Dispatcher(app=app)
     dp.message.middleware(AuthMiddleware(storage=storage))
