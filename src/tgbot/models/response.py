@@ -21,6 +21,7 @@ class InlineKeyboardResponse:
     inlines: list[list[InlineButton]]
     delete_reply_keyboard: bool = False
     edit_reply_keyboard: bool = False
+    delete_reply_keyboard_and_continue: bool = False
 
 
 @dataclass

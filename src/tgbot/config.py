@@ -15,6 +15,7 @@ class GoogleRepositoryConfig:
     clients_sheet_range: str
     work_time_report_sheet_name: str
     work_time_report_sheet_range: str
+    work_time_report_remove_col: str
     wtrs_sheet_name: str  # wtrs - work_time_report_staff
     wtrs_sheet_range: str
     wtrs_date_cell: str
@@ -101,6 +102,7 @@ def load_config(path: str):
             clients_sheet_range=google_repository_conf.get('clients_sheet_range'),
             work_time_report_sheet_name=google_repository_conf.get('work_time_report_sheet_name'),
             work_time_report_sheet_range=google_repository_conf.get('work_time_report_sheet_range'),
+            work_time_report_remove_col=google_repository_conf.get('work_time_report_remove_col'),
             wtrs_sheet_name=google_repository_conf.get('wtrs_sheet_name'),
             wtrs_sheet_range=google_repository_conf.get('wtrs_sheet_range'),
             wtrs_date_cell=google_repository_conf.get('wtrs_date_cell'),

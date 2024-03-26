@@ -70,6 +70,7 @@ class ClientReportScenario:
 
         edit_keyboard = False
         delete_keyboard = False
+        delete_keyboard_and_continue = False
         current_report = None
         current_report_index = None
         next_button = False
@@ -92,14 +93,32 @@ class ClientReportScenario:
                     edit_keyboard = True
                     index_offset = -1
                 elif callback_data.act == ClientReportAct.REMOVE_REPORT:
-                    # await self.repository.work_time_reports.remove_report(
-                    #     user=user,
-                    #     report_date=report_date,
-                    #     client=report_client,
-                    #     report_id=callback_data.report_id,
-                    # )
-                    edit_keyboard = True
-                    index_offset = -1
+                    remove_result = await self.repository.work_time_reports.delete_report(
+                        callback_data.report_id
+                    )
+                    if not remove_result:
+                        await self.notifier.notify(Notifications.RETRY_OR_CALL_ADMIN, user)
+                        edit_keyboard = True
+                        index_offset = 0
+                    else:
+                        await self.repository.work_time_reports.remove_reports_from_cache(user)
+                        reports = await self.repository.work_time_reports.get_reports(
+                            user=user,
+                            report_date=report_date,
+                            client=report_client,
+                        )
+                        stats = await self.repository.work_time_reports.get_stats(
+                            user=user,
+                            report_date=report_date,
+                            client=report_client,
+                        )
+                        await self.notifier.notify(Replies.REPORT_DELETED, user)
+                        pre_inline_msg = stats.get_msg()
+                        delete_keyboard_and_continue = True
+                        edit_keyboard = False
+                        current_report = reports[0] if reports else None
+                        current_report_index = 1
+                        next_button = len(reports) > 1 and current_report is not None
                 elif callback_data.act == ClientReportAct.OUT:
                     return await self.finish(user, scenario)
                 elif callback_data.act == ClientReportAct.IGNORE:
@@ -216,6 +235,7 @@ class ClientReportScenario:
             buttons=buttons,
             delete_reply_keyboard=delete_keyboard,
             edit_reply_keyboard=edit_keyboard,
+            delete_reply_keyboard_and_continue=delete_keyboard_and_continue,
         )
 
     async def choose_client(
@@ -272,7 +292,7 @@ class ClientReportScenario:
         )
 
     async def finish(self, user: User, scenario: Scenario, *args, **kwargs):
-        await self.repository.work_time_reports.delete_reports(user)
+        await self.repository.work_time_reports.delete_scenario_and_reports_from_cache(user)
         return FinalResponse()
 
     async def start(self, user: User) -> Response:

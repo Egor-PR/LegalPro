@@ -76,6 +76,9 @@ async def process_response(message: Message, response: Response):
             await message.edit_reply_markup(reply_markup=ikm)
             return
 
+        if response.inline_keyboard_response.delete_reply_keyboard_and_continue:
+            await message.delete_reply_markup()
+
         for i in range(len(response.inline_keyboard_response.messages)):
             if i + 1 == len(response.inline_keyboard_response.messages):
                 await message.answer(

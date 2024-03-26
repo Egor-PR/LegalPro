@@ -58,3 +58,4 @@ class Replies:
     BACK_TO_MENU = emojize('Вернуться в меню')
 
     LOADING = emojize('Идёт загрузка данных :man_walking:')
+    REPORT_DELETED = emojize('Отчет успешно удален :litter_in_bin_sign:')

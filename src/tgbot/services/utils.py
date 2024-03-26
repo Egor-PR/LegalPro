@@ -12,6 +12,7 @@ async def create_inline_keyboard_response(
     buttons: list[list[tuple[str, str]]],
     delete_reply_keyboard: bool = False,
     edit_reply_keyboard: bool = False,
+    delete_reply_keyboard_and_continue: bool = False,
 ):
     _buttons = [
         [
@@ -25,6 +26,7 @@ async def create_inline_keyboard_response(
         inlines=_buttons,
         delete_reply_keyboard=delete_reply_keyboard,
         edit_reply_keyboard=edit_reply_keyboard,
+        delete_reply_keyboard_and_continue=delete_reply_keyboard_and_continue,
     )
     return Response(
         type=ResponseType.INLINE_KEYBOARD,

@@ -36,6 +36,7 @@ class WorkTimeReport:
     comment: str | None = None
     user_job_title: str | None = None
     row_id: int | None = None
+    removed: bool = False
 
     dict = asdict
 

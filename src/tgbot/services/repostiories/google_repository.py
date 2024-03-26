@@ -46,6 +46,7 @@ class GoogleRepository:
         clients_sheet_range: str,
         work_time_report_sheet_name: str,
         work_time_report_sheet_range: str,
+        work_time_report_remove_col: str,
         wtrs_sheet_name: str,
         wtrs_sheet_range: str,
         wtrs_date_cell: str,
@@ -67,6 +68,7 @@ class GoogleRepository:
         self.clients_sheet_range = clients_sheet_range
         self.work_time_report_sheet_name = work_time_report_sheet_name
         self.work_time_report_sheet_range = work_time_report_sheet_range
+        self.work_time_report_remove_col = work_time_report_remove_col
         self.wtrs_sheet_name = wtrs_sheet_name
         self.wtrs_sheet_range = wtrs_sheet_range
         self.wtrs_date_cell = wtrs_date_cell
@@ -76,6 +78,19 @@ class GoogleRepository:
         self.wtrs_time_fact_cell = wtrs_time_fact_cell
         self.wtrs_time_net_cell = wtrs_time_net_cell
         self._lock_attempt_count = 10
+
+    async def mark_report_removed(self, row_id: int) -> bool:
+        cell = (f'{self.work_time_report_remove_col}{row_id}:'
+                f'{self.work_time_report_remove_col}{row_id}')
+        update_data = {
+            self.work_time_report_sheet_name: {
+               cell: [[SpreadsheetBool.yes]]
+            }
+        }
+        return self.google_sheet_service.update_many(
+            spreadsheet_id=self.spreadsheet_id,
+            data=update_data,
+        )
 
     async def update_work_time_report_data(
         self,
@@ -127,7 +142,7 @@ class GoogleRepository:
         reports = []
         for report_row in raw_reports:
             report = await self._parse_work_time_report_row(report_row)
-            if report:
+            if report and not report.removed:
                 reports.append(report)
         await self.storage.set_data(
             keys=[self._work_time_report_key, user.chat_id],
@@ -237,6 +252,10 @@ class GoogleRepository:
             logger.warning(f'Work time report row is too short: {report_row}')
             return None
 
+        removed = False
+        if len(report_row) == 10:
+            removed = report_row[9] == SpreadsheetBool.yes
+
         try:
             row_id = int(report_row[8])
         except ValueError:
@@ -253,6 +272,7 @@ class GoogleRepository:
             hours=report_row[6],
             comment=report_row[7],
             row_id=row_id,
+            removed=removed,
         )
 
     async def _set_lock(self, lock_key: str):

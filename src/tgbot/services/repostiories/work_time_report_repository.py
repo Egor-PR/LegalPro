@@ -24,7 +24,16 @@ class WorkTimeReportRepository:
         self.google_sheet_service = google_sheet_service
         self.google_repository = google_repository
 
-    async def delete_reports(self, user: User):
+    async def delete_report(self, report_id: int) -> bool:
+        return await self.google_repository.mark_report_removed(report_id)
+
+    async def remove_reports_from_cache(self, user: User):
+        await self.storage.del_keys([
+            [self._work_time_report_key, user.chat_id],
+            [self._work_time_report_stat_key, user.chat_id],
+        ])
+
+    async def delete_scenario_and_reports_from_cache(self, user: User):
         await self.storage.del_keys([
             [self._scenario_key, user.chat_id],
             [self._work_time_report_key, user.chat_id],
