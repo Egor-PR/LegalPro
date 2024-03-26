@@ -9,6 +9,9 @@ class RedisKeys(StrEnum):
     SCENARIO_KEY = 'scenario'
     WORK_TYPES_KEY = 'work_types'
     CLIENTS_KEY = 'clients'
+    WORK_TIME_REPORT_KEY = 'work_time_report'
+    WORK_TIME_REPORT_STAT_KEY = 'work_time_report_stat'
+    WORK_TIME_REPORT_LOCK_KEY = 'work_time_report_lock'
 
 
 class MenuButtons(StrEnum):
@@ -24,6 +27,8 @@ class Notifications:
     SAVE_IN_PROGRESS = emojize('Сохраняем данные :floppy_disk:')
     SAVING_PROBLEM = emojize('Произошла ошибка при сохранении данных :face_screaming_in_fear:')
     SAVING_SUCCESS = emojize('Данные успешно сохранены :check_mark:')
+    CALLBACK_DATA_ERROR = emojize('Ошибка в полученном запросе :thinking_face:')
+    RETRY_OR_CALL_ADMIN = emojize('Попробуйте еще раз или обратитесь к администратору')
 
 
 class Replies:
@@ -48,3 +53,6 @@ class Replies:
     WRONG_TIME_FORMAT = emojize('Неверный формат времени :man_facepalming:')
 
     ENTER_COMMENT = 'Добавьте комментарий'
+
+    NO_REPORTS = emojize('Отчетов нет')
+    BACK_TO_MENU = emojize('Вернуться в меню')

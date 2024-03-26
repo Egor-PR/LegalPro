@@ -10,6 +10,20 @@ class ResponseType(StrEnum):
 
 
 @dataclass
+class InlineButton:
+    text: str
+    callback_data: str
+
+
+@dataclass
+class InlineKeyboardResponse:
+    messages: list[str]
+    inlines: list[list[InlineButton]]
+    delete_reply_keyboard: bool = False
+    edit_reply_keyboard: bool = False
+
+
+@dataclass
 class ReplyCalendarResponse:
     messages: list[str]
     year: int
@@ -37,6 +51,7 @@ class Response:
     message_response: TextMessagesResponse | None = None
     reply_keyboard_response: ReplyKeyboardResponse | None = None
     calendar_response: ReplyCalendarResponse | None = None
+    inline_keyboard_response: InlineKeyboardResponse | None = None
 
 
 @dataclass

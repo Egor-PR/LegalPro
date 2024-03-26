@@ -1,4 +1,27 @@
+import re
 from dataclasses import dataclass, asdict
+
+
+@dataclass
+class WorkTimeReportStat:
+    report_date: str
+    time_plan: str | None = None
+    time_fact: str | None = None
+    time_net: str | None = None
+
+    dict = asdict
+
+    def get_msg(self):
+        report_date = re.escape(self.report_date)
+        time_plan = re.escape(self.time_plan if self.time_plan else '-')
+        time_fact = re.escape(self.time_fact if self.time_fact else '-')
+        time_net = re.escape(self.time_net if self.time_net else '-')
+        return f"""
+Дата: *{report_date}*
+План: *{time_plan}*
+Факт: *{time_fact}*
+Сальдо: *{time_net}*
+"""
 
 
 @dataclass
@@ -11,15 +34,26 @@ class WorkTimeReport:
     hours: str
     comment: str | None = None
     user_job_title: str | None = None
+    row_id: int | None = None
+
+    dict = asdict
 
     def get_list(self) -> list[str]:
         return [
             self.report_date,
             self.user_id,
             self.user_fullname,
-            self.user_job_title,
+            self.user_job_title if self.user_job_title else '-',
             self.work_type,
             self.client,
             self.hours,
-            self.comment,
+            self.comment if self.comment else '-',
         ]
+
+    def get_msg(self):
+        return f"""
+Дата: *{self.report_date}*
+Вид работы: *{self.work_type}*
+Клиент: *{self.client}*
+Часы: *{self.hours}*        
+"""

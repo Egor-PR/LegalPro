@@ -232,5 +232,4 @@ class WorkTimeReportScenario:
     ) -> Response:
         if user_scenario is None:
             return await self.start(user)
-
         return await self.step_dispatcher[user_scenario.current_step](user, user_scenario, message)

@@ -28,6 +28,9 @@ class ClientRepository:
             keys=[self._clients_key],
         )
         if not clients:
+            await self.google_repository.update_handbooks_data()
+            clients = await self.storage.get_data(keys=[self._clients_key])
+        if not clients:
             return []
         clients = [Client(**client) for client in clients[self._clients_key]]
         if is_completed is not None:

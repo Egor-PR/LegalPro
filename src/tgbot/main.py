@@ -52,6 +52,14 @@ async def main():
         clients_sheet_range=config.google_repository.clients_sheet_range,
         work_time_report_sheet_name=config.google_repository.work_time_report_sheet_name,
         work_time_report_sheet_range=config.google_repository.work_time_report_sheet_range,
+        wtrs_sheet_name=config.google_repository.wtrs_sheet_name,
+        wtrs_sheet_range=config.google_repository.wtrs_sheet_range,
+        wtrs_date_cell=config.google_repository.wtrs_date_cell,
+        wtrs_user_cell=config.google_repository.wtrs_user_cell,
+        wtrs_client_cell=config.google_repository.wtrs_client_cell,
+        wtrs_time_plan_cell=config.google_repository.wtrs_time_plan_cell,
+        wtrs_time_fact_cell=config.google_repository.wtrs_time_fact_cell,
+        wtrs_time_net_cell=config.google_repository.wtrs_time_net_cell,
     )
 
     logger.warning('Initiate repository')

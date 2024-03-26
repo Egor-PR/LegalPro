@@ -28,5 +28,10 @@ class WorkTypeRepository:
             keys=[self._work_type_key],
         )
         if not work_types:
+            await self.google_repository.update_handbooks_data()
+            work_types = await self.storage.get_data(keys=[self._work_type_key])
+
+        if not work_types:
             return []
+
         return [WorkType(**work_type) for work_type in work_types[self._work_type_key]]

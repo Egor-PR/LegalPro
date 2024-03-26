@@ -60,13 +60,16 @@ class Application:
                 user_message, user, user_scenario
             )
 
+        response = None
         if user_message == MenuButtons.TIME_REPORT:
             response = await WorkTimeReportScenario(self.repository, self.notifier).prologue(
                 user_message, user
             )
-            if isinstance(response, Response):
-                return response
         elif user_message == MenuButtons.CLIENT_REPORT:
-            pass
+            response = await ClientReportScenario(self.repository, self.notifier).prologue(
+                user_message, user
+            )
+        if isinstance(response, Response):
+            return response
 
         return await self.menu(user)

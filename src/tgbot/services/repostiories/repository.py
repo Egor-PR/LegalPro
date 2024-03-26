@@ -6,6 +6,7 @@ from .user_repository import UserRepository
 from .scenario_repository import ScenarioRepository
 from .work_type_repository import WorkTypeRepository
 from .client_repository import ClientRepository
+from .work_time_report_repository import WorkTimeReportRepository
 
 
 class Repository:
@@ -34,6 +35,11 @@ class Repository:
             google_repository=google_repository,
         )
         self.clients = ClientRepository(
+            storage=storage,
+            google_sheet_service=google_sheet_service,
+            google_repository=google_repository,
+        )
+        self.work_time_reports = WorkTimeReportRepository(
             storage=storage,
             google_sheet_service=google_sheet_service,
             google_repository=google_repository,

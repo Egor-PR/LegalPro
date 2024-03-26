@@ -15,6 +15,14 @@ class GoogleRepositoryConfig:
     clients_sheet_range: str
     work_time_report_sheet_name: str
     work_time_report_sheet_range: str
+    wtrs_sheet_name: str  # wtrs - work_time_report_staff
+    wtrs_sheet_range: str
+    wtrs_date_cell: str
+    wtrs_user_cell: str
+    wtrs_client_cell: str
+    wtrs_time_plan_cell: str
+    wtrs_time_fact_cell: str
+    wtrs_time_net_cell: str
 
 
 @dataclass
@@ -93,5 +101,13 @@ def load_config(path: str):
             clients_sheet_range=google_repository_conf.get('clients_sheet_range'),
             work_time_report_sheet_name=google_repository_conf.get('work_time_report_sheet_name'),
             work_time_report_sheet_range=google_repository_conf.get('work_time_report_sheet_range'),
+            wtrs_sheet_name=google_repository_conf.get('wtrs_sheet_name'),
+            wtrs_sheet_range=google_repository_conf.get('wtrs_sheet_range'),
+            wtrs_date_cell=google_repository_conf.get('wtrs_date_cell'),
+            wtrs_user_cell=google_repository_conf.get('wtrs_user_cell'),
+            wtrs_client_cell=google_repository_conf.get('wtrs_client_cell'),
+            wtrs_time_plan_cell=google_repository_conf.get('wtrs_time_plan_cell'),
+            wtrs_time_fact_cell=google_repository_conf.get('wtrs_time_fact_cell'),
+            wtrs_time_net_cell=google_repository_conf.get('wtrs_time_net_cell'),
         ),
     )
