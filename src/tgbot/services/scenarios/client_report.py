@@ -5,7 +5,7 @@ from enum import StrEnum
 from aiogram.filters.callback_data import CallbackData
 
 from models import User, Scenario, ScenarioStep
-from models import Response, ResponseType, ReplyKeyboardResponse, TextMessagesResponse
+from models import Response, ResponseType, ReplyKeyboardResponse, TextMessagesResponse, FinalResponse
 from services.constants import Replies, MenuButtons, Notifications
 from services.notifier import AbstractNotifier
 from services.repostiories import Repository
@@ -54,6 +54,9 @@ class ClientReportScenario:
         report_date = scenario.steps[self.report_date_step - 1].result
         report_client = scenario.steps[self.report_client_step - 1].result
 
+        if message is None:
+            await self.notifier.notify(Replies.LOADING, user)
+
         reports = await self.repository.work_time_reports.get_reports(
             user=user,
             report_date=report_date,
@@ -81,7 +84,6 @@ class ClientReportScenario:
                 await self.notifier.notify(Notifications.CALLBACK_DATA_ERROR, user)
                 await self.notifier.notify(Notifications.RETRY_OR_CALL_ADMIN, user)
             else:
-                logger.info(callback_data)
                 index_offset = 0
                 if callback_data.act == ClientReportAct.NEXT_REPORT:
                     edit_keyboard = True
@@ -98,19 +100,16 @@ class ClientReportScenario:
                     # )
                     edit_keyboard = True
                     index_offset = -1
+                elif callback_data.act == ClientReportAct.OUT:
+                    return await self.finish(user, scenario)
                 elif callback_data.act == ClientReportAct.IGNORE:
                     pass
 
                 for i, report in enumerate(reports):
                     if report.row_id == callback_data.report_id:
                         reports_length = len(reports)
-                        logger.info(f'index_offset: {index_offset}')
-                        logger.info(f'reports_length: {reports_length}')
-                        logger.info(f'i: {i}')
                         next_button = i + index_offset < reports_length - 1
                         prev_button = i + index_offset > 0
-                        logger.info(f'next_button: {next_button}')
-                        logger.info(f'prev_button: {prev_button}')
                         try:
                             current_report = reports[i + index_offset]
                             current_report_index = i + index_offset + 1
@@ -125,19 +124,21 @@ class ClientReportScenario:
             next_button = len(reports) > 1 and current_report is not None
             current_report_index = 1
 
-        logger.info(f'current_report: {current_report}')
-        logger.info(f'current_report_index: {current_report_index}')
-        logger.info(f'next_button: {next_button}')
-        logger.info(f'prev_button: {prev_button}')
-        logger.info(f'pre_inline_msg: {pre_inline_msg}')
-
         if current_report is not None:
-            report_btn = (
-                current_report.get_msg(),
+            client_btn = (
+                current_report.client,
                 ClientReportActCallback(act=ClientReportAct.IGNORE).pack(),
             )
-            page_number_btn = (
-                f'{current_report_index} из {len(reports)}',
+            work_type_btn = (
+                current_report.work_type,
+                ClientReportActCallback(act=ClientReportAct.IGNORE).pack(),
+            )
+            hours_btn = (
+                f'{current_report.hours} ч',
+                ClientReportActCallback(act=ClientReportAct.IGNORE).pack(),
+            )
+            comment_btn = (
+                f'Комментарий: {current_report.comment}',
                 ClientReportActCallback(act=ClientReportAct.IGNORE).pack(),
             )
             paginate_btns = []
@@ -149,7 +150,17 @@ class ClientReportScenario:
                         report_id=current_report.row_id,
                     ).pack(),
                 )
-                paginate_btns.append(prev_report_btn)
+            else:
+                prev_report_btn = (
+                    ' ',
+                    ClientReportActCallback(act=ClientReportAct.IGNORE).pack(),
+                )
+            paginate_btns.append(prev_report_btn)
+            page_number_btn = (
+                f'{current_report_index}/{len(reports)}',
+                ClientReportActCallback(act=ClientReportAct.IGNORE).pack(),
+            )
+            paginate_btns.append(page_number_btn)
             if next_button:
                 next_report_btn = (
                     'След. >>',
@@ -158,7 +169,12 @@ class ClientReportScenario:
                         report_id=current_report.row_id,
                     ).pack(),
                 )
-                paginate_btns.append(next_report_btn)
+            else:
+                next_report_btn = (
+                    ' ',
+                    ClientReportActCallback(act=ClientReportAct.IGNORE).pack(),
+                )
+            paginate_btns.append(next_report_btn)
             delete_btn = (
                 'Удалить',
                 ClientReportActCallback(
@@ -171,13 +187,14 @@ class ClientReportScenario:
                 ClientReportActCallback(act=ClientReportAct.OUT).pack(),
             )
             buttons = [
-                [report_btn],
-                [page_number_btn],
+                [client_btn],
+                [work_type_btn],
+                [hours_btn],
+                [comment_btn],
+                paginate_btns,
+                [delete_btn],
+                [out_btn],
             ]
-            if paginate_btns:
-                buttons.append(paginate_btns)
-            buttons.append([delete_btn])
-            buttons.append([out_btn])
         else:
             no_reports_btn = (
                 Replies.NO_REPORTS,
@@ -238,7 +255,6 @@ class ClientReportScenario:
     ) -> Response:
         step_number = self.report_date_step
         await self._add_step(step_number, user, scenario)
-        logger.info(message)
         if message is not None:
             try:
                 message_date = datetime.strptime(message, '%d.%m.%Y')
@@ -254,6 +270,10 @@ class ClientReportScenario:
             year=datetime.now().year,
             month=datetime.now().month,
         )
+
+    async def finish(self, user: User, scenario: Scenario, *args, **kwargs):
+        await self.repository.work_time_reports.delete_reports(user)
+        return FinalResponse()
 
     async def start(self, user: User) -> Response:
         _scenario = Scenario(

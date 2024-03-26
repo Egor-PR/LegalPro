@@ -56,3 +56,5 @@ class Replies:
 
     NO_REPORTS = emojize('Отчетов нет')
     BACK_TO_MENU = emojize('Вернуться в меню')
+
+    LOADING = emojize('Идёт загрузка данных :man_walking:')

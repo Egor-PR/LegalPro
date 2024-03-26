@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 class WorkTimeReportRepository:
     _work_time_report_key = RedisKeys.WORK_TIME_REPORT_KEY
     _work_time_report_stat_key = RedisKeys.WORK_TIME_REPORT_STAT_KEY
+    _scenario_key = RedisKeys.SCENARIO_KEY
 
     def __init__(
         self,
@@ -22,6 +23,13 @@ class WorkTimeReportRepository:
         self.storage = storage
         self.google_sheet_service = google_sheet_service
         self.google_repository = google_repository
+
+    async def delete_reports(self, user: User):
+        await self.storage.del_keys([
+            [self._scenario_key, user.chat_id],
+            [self._work_time_report_key, user.chat_id],
+            [self._work_time_report_stat_key, user.chat_id],
+        ])
 
     async def get_stats(
         self,

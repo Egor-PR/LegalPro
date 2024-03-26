@@ -11,6 +11,13 @@ class Storage(RedisStorage):
         super().__init__(*args, **kwargs)
         self.key_separator = ':'
 
+    async def del_keys(
+        self,
+        list_of_keys: list[list[str]],
+    ):
+        keys = [await self.build_key(k) for k in list_of_keys]
+        await self.redis.delete(*keys)
+
     async def build_key(
         self,
         key: list[str | int],

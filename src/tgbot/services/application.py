@@ -51,24 +51,26 @@ class Application:
 
         user_scenario = await self.repository.scenarios.get_user_scenario(user)
 
+        response = None
         if user_scenario and user_scenario.name == WorkTimeReportScenario.name:
-            return await WorkTimeReportScenario(self.repository, self.notifier).prologue(
+            response = await WorkTimeReportScenario(self.repository, self.notifier).prologue(
                 user_message, user, user_scenario
             )
         elif user_scenario and user_scenario.name == ClientReportScenario.name:
-            return await ClientReportScenario(self.repository, self.notifier).prologue(
+            response = await ClientReportScenario(self.repository, self.notifier).prologue(
                 user_message, user, user_scenario
             )
 
-        response = None
-        if user_message == MenuButtons.TIME_REPORT:
-            response = await WorkTimeReportScenario(self.repository, self.notifier).prologue(
-                user_message, user
-            )
-        elif user_message == MenuButtons.CLIENT_REPORT:
-            response = await ClientReportScenario(self.repository, self.notifier).prologue(
-                user_message, user
-            )
+        if response is None:
+            if user_message == MenuButtons.TIME_REPORT:
+                response = await WorkTimeReportScenario(self.repository, self.notifier).prologue(
+                    user_message, user
+                )
+            elif user_message == MenuButtons.CLIENT_REPORT:
+                response = await ClientReportScenario(self.repository, self.notifier).prologue(
+                    user_message, user
+                )
+
         if isinstance(response, Response):
             return response
 

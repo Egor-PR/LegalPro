@@ -13,14 +13,15 @@ class WorkTimeReportStat:
 
     def get_msg(self):
         report_date = re.escape(self.report_date)
-        time_plan = re.escape(self.time_plan if self.time_plan else '-')
-        time_fact = re.escape(self.time_fact if self.time_fact else '-')
-        time_net = re.escape(self.time_net if self.time_net else '-')
+        time_plan = re.escape(self.time_plan if self.time_plan else '0')
+        time_fact = re.escape(self.time_fact if self.time_fact else '0')
+        time_net = re.escape(self.time_net if self.time_net else '0')
         return f"""
-Дата: *{report_date}*
-План: *{time_plan}*
-Факт: *{time_fact}*
-Сальдо: *{time_net}*
+*Общий отчет {report_date}*
+
+План: *{time_plan} ч*
+Факт: *{time_fact} ч*
+Сальдо: *{time_net} ч*
 """
 
 
@@ -52,7 +53,6 @@ class WorkTimeReport:
 
     def get_msg(self):
         return f"""
-Дата: *{self.report_date}*
 Вид работы: *{self.work_type}*
 Клиент: *{self.client}*
 Часы: *{self.hours}*        

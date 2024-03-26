@@ -31,6 +31,12 @@ async def process_response(message: Message, response: Response):
             resize_keyboard=response.reply_keyboard_response.resize_keyboard,
         )
         msgs = response.reply_keyboard_response.messages
+
+        try:
+            await message.delete_reply_markup()
+        except Exception:
+            pass
+
         for i in range(len(msgs)):
             if i + 1 == len(msgs):
                 await message.answer(text=msgs[i], reply_markup=rkm)

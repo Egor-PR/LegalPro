@@ -84,18 +84,14 @@ class GoogleRepository:
         client: str | None = None,
     ):
         await self._set_lock(self._work_time_report_lock_key)
+        client = '' if client is None else client
         update_data = {
             self.wtrs_sheet_name: {
                 f'{self.wtrs_date_cell}:{self.wtrs_date_cell}': [[report_date]],
                 f'{self.wtrs_user_cell}:{self.wtrs_user_cell}': [[user.id]],
+                f'{self.wtrs_client_cell}:{self.wtrs_client_cell}': [[client]]
             }
         }
-        if client:
-            update_data[self.wtrs_sheet_name].update(
-                {
-                    f'{self.wtrs_client_cell}:{self.wtrs_client_cell}': [[client]]
-                }
-            )
 
         set_filter_result = self.google_sheet_service.update_many(
             spreadsheet_id=self.spreadsheet_id,
@@ -118,7 +114,6 @@ class GoogleRepository:
             spreadsheet_id=self.spreadsheet_id,
             ranges=get_data,
         )
-        logger.info(f'Google ranges: {google_ranges}')
         if len(google_ranges) != len(get_data):
             logger.error(f'Google ranges count is not equal {len(get_data)}')
             await self._delete_lock(self._work_time_report_lock_key)
