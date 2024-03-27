@@ -226,7 +226,7 @@ class WorkTimeReportScenario:
 
     async def prologue(
         self,
-        message: str,
+        message: str | None,
         user: User,
         user_scenario: Scenario | None = None,
     ) -> Response:

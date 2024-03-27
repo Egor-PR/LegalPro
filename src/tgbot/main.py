@@ -8,7 +8,7 @@ from middlewares import AuthMiddleware
 from services import Application, GoogleSheetsApiService, Storage
 from services.notifier import AbstractNotifier, TelegramBotNotifier
 from services.repostiories import Repository, GoogleRepository
-from handlers import messages_router
+from handlers import commands_router, messages_router, BotCommands
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +73,12 @@ async def main():
     logger.warning('Starting bot')
     bot = Bot(token=config.tgbot.token)
 
+    logger.warning(f'Set bot commands')
+    result = bot.set_my_commands(BotCommands.get_list())
+    if not result:
+        logger.error('Can`t set bot commands!')
+        return
+
     logger.warning('Initiate notifier')
     notifier: AbstractNotifier = TelegramBotNotifier(bot=bot)
 
@@ -83,6 +89,7 @@ async def main():
     dp.message.middleware(AuthMiddleware(storage=storage))
     dp.callback_query.middleware(AuthMiddleware(storage=storage))
     dp.include_routers(
+        commands_router,
         messages_router,
     )
 

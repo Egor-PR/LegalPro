@@ -25,6 +25,9 @@ class UserRepository:
         self.google_sheet_service = google_sheet_service
         self.google_repository = google_repository
 
+    async def delete_user(self, chat_id: int):
+        await self.storage.del_keys([[self._user_key, str(chat_id)]])
+
     async def get_user_by_chat_id(self, chat_id: int) -> User | None:
         _user = None
         user_dict = await self.storage.get_data(
@@ -47,9 +50,10 @@ class UserRepository:
         return _user
 
     async def get_user_by_code(self, user_code: str) -> User | None:
+        user_code = user_code.strip()
         users = await self.get_users()
         for user in users:
-            if user.id == user_code and user.is_active:
+            if user.id.strip() == user_code and user.is_active:
                 return user
         return None
 
