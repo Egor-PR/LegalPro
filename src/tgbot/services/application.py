@@ -16,12 +16,16 @@ class Application:
         self.repository = repository
         self.notifier = notifier
 
-    async def logout(self, user: User):
+    async def logout(self, user: User | None):
+        if user is None:
+            return await self.start(user)
         await self.repository.work_time_reports.delete_scenario_and_reports_from_cache(user)
         await self.repository.users.delete_user(user.chat_id)
         return await self.execute(user_message=None, user=None, chat_id=user.chat_id)
 
-    async def back(self, user: User) -> Response:
+    async def back(self, user: User | None) -> Response:
+        if user is None:
+            return await self.start(user)
         scenario = await self.repository.scenarios.get_user_scenario(user)
         if scenario:
             scenario.steps = scenario.steps[:-1]
@@ -31,7 +35,9 @@ class Application:
             await self.repository.scenarios.upsert_user_scenario(user, scenario)
         return await self.execute(user_message=None, user=user)
 
-    async def reset(self, user: User) -> Response:
+    async def reset(self, user: User | None) -> Response:
+        if user is None:
+            return await self.start(user)
         scenario = await self.repository.scenarios.get_user_scenario(user)
         if scenario:
             scenario.steps = scenario.steps[:1]
@@ -47,9 +53,14 @@ class Application:
         await self.notifier.notify(name, user)
         return await self.execute(user_message=None, user=user)
 
-    async def start(self, user: User) -> Response:
-        await self.repository.work_time_reports.delete_scenario_and_reports_from_cache(user)
-        return await self.menu(user)
+    async def start(self, user: User | None) -> Response:
+        if user:
+            await self.repository.work_time_reports.delete_scenario_and_reports_from_cache(user)
+            return await self.menu(user)
+        else:
+            return await create_message_response([
+                Replies.PLEASE_AUTH, Replies.ENTER_PERSONAL_CODE
+            ])
 
     async def menu(self, user: User) -> Response:
         menu_buttons = [
