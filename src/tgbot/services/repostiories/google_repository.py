@@ -49,7 +49,8 @@ class GoogleRepository:
         work_time_report_remove_col: str,
         wtrs_sheet_name: str,
         wtrs_sheet_range: str,
-        wtrs_date_cell: str,
+        wtrs_date_from_cell: str,
+        wtrs_date_to_cell: str,
         wtrs_user_cell: str,
         wtrs_client_cell: str,
         wtrs_time_plan_cell: str,
@@ -71,7 +72,8 @@ class GoogleRepository:
         self.work_time_report_remove_col = work_time_report_remove_col
         self.wtrs_sheet_name = wtrs_sheet_name
         self.wtrs_sheet_range = wtrs_sheet_range
-        self.wtrs_date_cell = wtrs_date_cell
+        self.wtrs_date_from_cell = wtrs_date_from_cell
+        self.wtrs_date_to_cell = wtrs_date_to_cell
         self.wtrs_user_cell = wtrs_user_cell
         self.wtrs_client_cell = wtrs_client_cell
         self.wtrs_time_plan_cell = wtrs_time_plan_cell
@@ -95,15 +97,21 @@ class GoogleRepository:
     async def update_work_time_report_data(
         self,
         user: User,
-        report_date: str,
+        report_from_date: str | None = None,
+        report_to_date: str | None = None,
         client: str | None = None,
+        user_id: str | None = None,
     ):
         await self._set_lock(self._work_time_report_lock_key)
         client = '' if client is None else client
+        report_from_date = '' if report_from_date is None else report_from_date
+        report_to_date = '' if report_to_date is None else report_to_date
+        user_id = '' if user_id is None else user_id
         update_data = {
             self.wtrs_sheet_name: {
-                f'{self.wtrs_date_cell}:{self.wtrs_date_cell}': [[report_date]],
-                f'{self.wtrs_user_cell}:{self.wtrs_user_cell}': [[user.id]],
+                f'{self.wtrs_date_from_cell}:{self.wtrs_date_from_cell}': [[report_from_date]],
+                f'{self.wtrs_date_to_cell}:{self.wtrs_date_to_cell}': [[report_to_date]],
+                f'{self.wtrs_user_cell}:{self.wtrs_user_cell}': [[user_id]],
                 f'{self.wtrs_client_cell}:{self.wtrs_client_cell}': [[client]]
             }
         }
@@ -167,7 +175,8 @@ class GoogleRepository:
                 time_plan=time_plan,
                 time_fact=time_fact,
                 time_net=time_net,
-                report_date=report_date,
+                report_from_date=report_from_date,
+                report_to_date=report_to_date,
             )
             await self.storage.set_data(
                 keys=[self._work_time_report_stat_key, user.chat_id],

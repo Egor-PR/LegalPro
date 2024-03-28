@@ -29,6 +29,7 @@ class ReplyCalendarResponse:
     messages: list[str]
     year: int
     month: int
+    skip_calendar: bool = False
 
 
 @dataclass

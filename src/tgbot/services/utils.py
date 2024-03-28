@@ -38,11 +38,13 @@ async def create_calendar_response(
     messages: list[str],
     year: int,
     month: int,
+    skip_calendar: bool = False,
 ) -> Response:
     calendar_resp = ReplyCalendarResponse(
         messages=messages,
         year=year,
         month=month,
+        skip_calendar=skip_calendar,
     )
     return Response(
         type=ResponseType.CALENDAR,

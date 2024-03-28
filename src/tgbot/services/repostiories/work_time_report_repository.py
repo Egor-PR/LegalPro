@@ -43,13 +43,16 @@ class WorkTimeReportRepository:
     async def get_stats(
         self,
         user: User,
-        report_date: str,
+        report_from_date: str | None = None,
+        report_to_date: str | None = None,
         client: str | None = None,
+        user_id: str | None = None,
     ) -> WorkTimeReportStat:
         keys = [self._work_time_report_stat_key, user.chat_id]
         stats = await self.storage.get_data(keys=keys)
         if not stats:
-            await self.google_repository.update_work_time_report_data(user, report_date, client)
+            await self.google_repository.update_work_time_report_data(
+                user, report_from_date, report_to_date, client, user_id)
             stats = await self.storage.get_data(keys=keys)
 
         if not stats:
@@ -64,13 +67,16 @@ class WorkTimeReportRepository:
     async def get_reports(
         self,
         user: User,
-        report_date: str,
+        report_from_date: str | None = None,
+        report_to_date: str | None = None,
         client: str | None = None,
+        user_id: str | None = None,
     ) -> list[WorkTimeReport]:
         keys = [self._work_time_report_key, user.chat_id]
         reports = await self.storage.get_data(keys=keys)
         if not reports:
-            await self.google_repository.update_work_time_report_data(user, report_date, client)
+            await self.google_repository.update_work_time_report_data(
+                user, report_from_date, report_to_date, client, user_id)
             reports = await self.storage.get_data(keys=keys)
 
         if not reports:

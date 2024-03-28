@@ -29,16 +29,20 @@ class ClientReportActCallback(CallbackData, prefix='act_report'):
 
 class ClientReportScenario:
     name = 'client_report'
-    report_date_step = 1
-    report_client_step = 2
-    act_report_step = 3
+    report_from_date_step = 1
+    report_to_date_step = 2
+    report_client_step = 3
+    report_user_step = 4
+    act_report_step = 5
     
     def __init__(self, repository: Repository, notifier: AbstractNotifier):
         self.repository = repository
         self.notifier = notifier
         self.step_dispatcher = {
-            self.report_date_step: self.enter_date,
+            self.report_from_date_step: self.enter_from_date,
+            self.report_to_date_step: self.enter_to_date,
             self.report_client_step: self.choose_client,
+            self.report_user_step: self.choose_user,
             self.act_report_step: self.act_report,
         }
 
@@ -51,21 +55,27 @@ class ClientReportScenario:
         step_number = self.act_report_step
         await self._add_step(step_number, user, scenario)
 
-        report_date = scenario.steps[self.report_date_step - 1].result
+        report_from_date = scenario.steps[self.report_from_date_step - 1].result
+        report_to_date = scenario.steps[self.report_to_date_step - 1].result
         report_client = scenario.steps[self.report_client_step - 1].result
+        report_user = scenario.steps[self.report_user_step - 1].result
 
         if message is None:
             await self.notifier.notify(Replies.LOADING, user)
 
         reports = await self.repository.work_time_reports.get_reports(
             user=user,
-            report_date=report_date,
+            report_from_date=report_from_date,
+            report_to_date=report_to_date,
             client=report_client,
+            user_id=report_user,
         )
         stats = await self.repository.work_time_reports.get_stats(
             user=user,
-            report_date=report_date,
+            report_from_date=report_from_date,
+            report_to_date=report_to_date,
             client=report_client,
+            user_id=report_user,
         )
 
         edit_keyboard = False
@@ -104,13 +114,17 @@ class ClientReportScenario:
                         await self.repository.work_time_reports.remove_reports_from_cache(user)
                         reports = await self.repository.work_time_reports.get_reports(
                             user=user,
-                            report_date=report_date,
+                            report_from_date=report_from_date,
+                            report_to_date=report_to_date,
                             client=report_client,
+                            user_id=report_user,
                         )
                         stats = await self.repository.work_time_reports.get_stats(
                             user=user,
-                            report_date=report_date,
+                            report_from_date=report_from_date,
+                            report_to_date=report_to_date,
                             client=report_client,
+                            user_id=report_user,
                         )
                         await self.notifier.notify(Replies.REPORT_DELETED, user)
                         pre_inline_msg = stats.get_msg()
@@ -160,6 +174,18 @@ class ClientReportScenario:
                 f'Комментарий: {current_report.comment}',
                 ClientReportActCallback(act=ClientReportAct.IGNORE).pack(),
             )
+            buttons = [
+                [client_btn],
+                [work_type_btn],
+                [hours_btn],
+                [comment_btn],
+            ]
+            if user.admin:
+                staff_btn = (
+                    f'Сотрудник: {current_report.user_fullname}',
+                    ClientReportActCallback(act=ClientReportAct.IGNORE).pack(),
+                )
+                buttons.append([staff_btn])
             paginate_btns = []
             if prev_button:
                 prev_report_btn = (
@@ -205,15 +231,11 @@ class ClientReportScenario:
                 Replies.BACK_TO_MENU,
                 ClientReportActCallback(act=ClientReportAct.OUT).pack(),
             )
-            buttons = [
-                [client_btn],
-                [work_type_btn],
-                [hours_btn],
-                [comment_btn],
+            buttons.extend([
                 paginate_btns,
                 [delete_btn],
                 [out_btn],
-            ]
+            ])
         else:
             no_reports_btn = (
                 Replies.NO_REPORTS,
@@ -238,6 +260,41 @@ class ClientReportScenario:
             delete_reply_keyboard_and_continue=delete_keyboard_and_continue,
         )
 
+    async def choose_user(
+        self,
+        user: User,
+        scenario: Scenario,
+        message: str | None = None,
+    ) -> Response:
+        step_number = self.report_user_step
+        await self._add_step(step_number, user, scenario)
+        if not user.admin:
+            return await self._fix_and_next(step_number, user.id, user, scenario)
+
+        users = await self.repository.users.get_users()
+        users_buttons = [[user.fullname] for user in users]
+        users_buttons.append([Replies.SKIP])
+
+        if message is not None:
+            if message == Replies.SKIP:
+                return await self._fix_and_next(step_number, user.id, user, scenario)
+            right_answers = {user.fullname: user.id for user in users}
+            user_id = right_answers.get(message)
+            if user_id is None:
+                return await create_reply_keyboard_response(
+                    messages=[Replies.WRONG_USER, Replies.CHOOSE_USER],
+                    buttons=users_buttons,
+                    resize_keyboard=True,
+                )
+            return await self._fix_and_next(step_number, user_id, user, scenario)
+
+        return await create_reply_keyboard_response(
+            messages=[Replies.CHOOSE_USER],
+            buttons=users_buttons,
+            resize_keyboard=True,
+
+        )
+
     async def choose_client(
         self,
         user: User,
@@ -248,7 +305,8 @@ class ClientReportScenario:
         await self._add_step(step_number, user, scenario)
         clients = await self.repository.clients.get_clients(is_completed=False)
         client_list = [[client.name] for client in clients]
-        client_list.append([Replies.SKIP])
+        if scenario.steps[self.report_from_date_step - 1].result is not None:
+            client_list.append([Replies.SKIP])
         if message is not None:
             right_answers = [client.name for client in clients]
             right_answers.extend([Replies.SKIP])
@@ -267,13 +325,37 @@ class ClientReportScenario:
             resize_keyboard=True,
         )
 
-    async def enter_date(
+    async def enter_to_date(
         self,
         user: User,
         scenario: Scenario,
         message: str | None = None,
     ) -> Response:
-        step_number = self.report_date_step
+        step_number = self.report_to_date_step
+        if len(scenario.steps) < step_number and scenario.steps[-1].result is None:
+            await self._add_step(step_number, user, scenario)
+            return await self._fix_and_next(step_number, message, user, scenario)
+        return await self.enter_date(step_number, user, scenario, message)
+
+    async def enter_from_date(
+        self,
+        user: User,
+        scenario: Scenario,
+        message: str | None = None,
+    ) -> Response:
+        step_number = self.report_from_date_step
+        if message == Replies.SKIP:
+            return await self._fix_and_next(step_number, None, user, scenario)
+        return await self.enter_date(step_number, user, scenario, message, skip_calendar=True)
+
+    async def enter_date(
+        self,
+        step_number: int,
+        user: User,
+        scenario: Scenario,
+        message: str | None = None,
+        skip_calendar: bool = False,
+    ) -> Response:
         await self._add_step(step_number, user, scenario)
         if message is not None:
             try:
@@ -284,11 +366,13 @@ class ClientReportScenario:
                     messages=[Replies.WRONG_DATE_FORMAT, Replies.ENTER_DATE, Replies.CHOOSE_DATE],
                     year=datetime.now().year,
                     month=datetime.now().month,
+                    skip_calendar=skip_calendar,
                 )
         return await create_calendar_response(
             messages=[Replies.ENTER_DATE, Replies.CHOOSE_DATE],
             year=datetime.now().year,
             month=datetime.now().month,
+            skip_calendar=skip_calendar,
         )
 
     async def finish(self, user: User, scenario: Scenario, *args, **kwargs):

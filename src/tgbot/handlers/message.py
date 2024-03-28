@@ -48,6 +48,7 @@ async def process_response(message: Message, response: Response):
         rkm = await SimpleCalendar().start_calendar(
             year=response.calendar_response.year,
             month=response.calendar_response.month,
+            skip_calendar=response.calendar_response.skip_calendar,
         )
         msgs = response.calendar_response.messages
         for i in range(len(msgs)):

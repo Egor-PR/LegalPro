@@ -4,7 +4,8 @@ from dataclasses import dataclass, asdict
 
 @dataclass
 class WorkTimeReportStat:
-    report_date: str
+    report_from_date: str | None = None
+    report_to_date: str | None = None
     time_plan: str | None = None
     time_fact: str | None = None
     time_net: str | None = None
@@ -12,10 +13,15 @@ class WorkTimeReportStat:
     dict = asdict
 
     def get_msg(self):
-        report_date = re.escape(self.report_date)
-        time_plan = re.escape(self.time_plan if self.time_plan else '0')
-        time_fact = re.escape(self.time_fact if self.time_fact else '0')
-        time_net = re.escape(self.time_net if self.time_net else '0')
+        report_from_date = re.escape(self.report_from_date) if self.report_from_date else ''
+        report_to_date = re.escape(self.report_to_date) if self.report_to_date else ''
+        if report_from_date and report_to_date:
+            report_date = f"с {report_from_date} по {report_to_date}"
+        else:
+            report_date = ''
+        time_plan = re.escape(self.time_plan if self.time_plan else '00:00:00')
+        time_fact = re.escape(self.time_fact if self.time_fact else '00:00:00')
+        time_net = re.escape(self.time_net if self.time_net else '00:00:00')
         return f"""
 *Общий отчет {report_date}*
 
