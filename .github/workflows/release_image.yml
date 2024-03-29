@@ -1,0 +1,26 @@
+name: release_image
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: anatolyworm/urprofbot:latest
+
+jobs:
+    release:
+      name: Build & release image
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+        - name: Login to GitHub Container Registry
+          run:
+              echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        - name: Build and Publish
+          run: |
+            docker build -f ./docker/vr/Dockerfile . --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
