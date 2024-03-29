@@ -128,7 +128,7 @@ class GoogleRepository:
 
         get_data = [
             (self.wtrs_sheet_name, self.wtrs_sheet_range,),
-            (self.wtrs_sheet_name, f'{self.wtrs_time_plan_cell}:{self.wtrs_time_net_cell}',),
+            (self.wtrs_sheet_name, f'{self.wtrs_time_plan_cell}:{self.wtrs_time_plan_cell}',),
             (self.wtrs_sheet_name, f'{self.wtrs_time_fact_cell}:{self.wtrs_time_fact_cell}',),
             (self.wtrs_sheet_name, f'{self.wtrs_time_net_cell}:{self.wtrs_time_net_cell}',),
         ]
