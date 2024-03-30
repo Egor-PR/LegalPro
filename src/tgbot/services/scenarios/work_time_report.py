@@ -89,7 +89,7 @@ class WorkTimeReportScenario:
         clients = await self.repository.clients.get_clients(is_completed=False)
         client_list = [[client.name] for client in clients]
         if message is not None:
-            if message not in [client.name for client in clients]:
+            if message.strip() not in [client.name.strip() for client in clients]:
                 return await create_reply_keyboard_response(
                     messages=[Replies.WRONG_CLIENT, Replies.CHOOSE_CLIENT],
                     buttons=client_list,
@@ -113,7 +113,7 @@ class WorkTimeReportScenario:
         work_types = await self.repository.work_types.get_work_types()
         work_list = [[work_type.name] for work_type in work_types]
         if message is not None:
-            if message not in [work_type.name for work_type in work_types]:
+            if message.strip() not in [work_type.name.strip() for work_type in work_types]:
                 return await create_reply_keyboard_response(
                     messages=[Replies.WRONG_WORK_TYPE, Replies.CHOOSE_WORK_TYPE],
                     buttons=work_list,

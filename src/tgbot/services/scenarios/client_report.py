@@ -278,8 +278,8 @@ class ClientReportScenario:
         if message is not None:
             if message == Replies.SKIP:
                 return await self._fix_and_next(step_number, user.id, user, scenario)
-            right_answers = {user.fullname: user.id for user in users}
-            user_id = right_answers.get(message)
+            right_answers = {user.fullname.strip(): user.id for user in users}
+            user_id = right_answers.get(message.strip())
             if user_id is None:
                 return await create_reply_keyboard_response(
                     messages=[Replies.WRONG_USER, Replies.CHOOSE_USER],
@@ -308,9 +308,9 @@ class ClientReportScenario:
         if scenario.steps[self.report_from_date_step - 1].result is not None:
             client_list.append([Replies.SKIP])
         if message is not None:
-            right_answers = [client.name for client in clients]
+            right_answers = [client.name.strip() for client in clients]
             right_answers.extend([Replies.SKIP])
-            if message not in right_answers:
+            if message.strip() not in right_answers:
                 return await create_reply_keyboard_response(
                     messages=[Replies.WRONG_CLIENT, Replies.CHOOSE_CLIENT],
                     buttons=client_list,
