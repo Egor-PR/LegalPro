@@ -249,6 +249,7 @@ class GoogleRepository:
             client = await self._parse_client_row(client_row)
             if client:
                 clients.append(client)
+        clients = sorted(clients, key=lambda x: x.name.lower())
 
         await self.storage.set_data(
             keys=[self._clients_key],
